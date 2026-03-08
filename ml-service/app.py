@@ -43,3 +43,64 @@ def categorize_price(price):
     elif price < 4_000_000_000: return "3 - 4 Miliar"
     elif price < 5_000_000_000: return "4 - 5 Miliar"
     else: return "> 5 Miliar"
+
+@app.route('/predict', methods=['POST'])
+def predict():
+    try:
+        data = request.json
+        selected_district = data.get("kecamatan")
+
+        if selected_district in unavailable_district:
+            return jsonify({
+                "success": False,
+                "error": f"House price for {selected_district} district is not available."
+            }), 400
+        
+        if selected_district not in available_district:
+            return jsonify({
+                "success": False,
+                "error": "Distric is not valid"
+            }), 400
+        
+        # One-hot encoding the district
+        district_encoded = {f'kec_{district}': 0 for district in available_district}
+        district_encoded[f"kec_{selected_district}"] = 1
+
+        # User inputted data frame
+        df_input = pd.DataFrame({
+            'Kamar Tidur': [data.get('kamar_tidur', 3)],
+            'Kamar Mandi': [data.get('kamar_mandi', 2)],
+            'Luas Tanah': [np.log1p(data.get('luas_tanah', 100))],
+            'Luas Bangunan': [np.log1p(data.get('luas_bangunan', 80))],
+            'Daya Listrik': [data.get('daya_listrik', 1300)],
+            'Jumlah Lantai': [data.get('jumlah_lantai', 1)],
+            'Carport': [data.get('carport', 1)],
+            'Kamar Tidur Pembantu': [data.get('kamar_tidur_pembantu', 0)],
+            'Kamar Mandi Pembantu': [data.get('kamar_mandi_pembantu', 0)]
+        })
+
+        # Electrical power encoding
+        df_input[['Daya Listrik']] = watt_enc.transform(df_input[['Data Listrik']])
+
+        # Join and sort column
+        df_final = pd.concat([df_input, pd.DataFrame([district_encoded])], axis=1)
+        expected_columns = [
+            'Kamar Tidur', 'Kamar Mandi', 'Luas Tanah', 'Luas Bangunan', 'Daya Listrik',
+            'Jumlah Lantai', 'Carport', 'Kamar Tidur Pembantu', 'Kamar Mandi Pembantu'
+        ] + [f'kec_{kec}' for kec in available_district]
+        df_final = df_final[expected_columns]
+
+        # Scaling and prediction
+        df_scaled = scaler.transform(df_final)
+        predicted_price_log = model_xgb.predict(df_scaled)
+        predicted_price = np.expm1(predicted_price_log)
+
+        return jsonify({
+            "success": True,
+            "predicted_price": float(predicted_price[0])
+        })
+    except Exception as e:
+        return jsonify({
+            "success": False,
+            "error": str(e)
+        }), 500
