@@ -104,3 +104,56 @@ def predict():
             "success": False,
             "error": str(e)
         }), 500
+    
+@app.route('/specs', methods=['GET'])
+def get_specs():
+    try:
+        lokasi_filter = request.args.get('kecamatan')
+        harga_filter = request.args.get('range_harga')
+
+        if not os.path.exists("data/processed/Data Harga Rumah Kabupaten Tangerang.csv"):
+            return jsonify({"success": False, "error": "Dataset tidak ditemukan."}), 404
+
+        df_rumah = pd.read_csv("data/processed/Data Harga Rumah Kabupaten Tangerang.csv")
+        df_rumah["Range Harga"] = df_rumah["Harga"].apply(categorize_price)
+
+        # Jika hanya request list kecamatan dan range harga (untuk dropdown frontend)
+        if not lokasi_filter and not harga_filter:
+            return jsonify({
+                "success": True,
+                "kecamatan_list": sorted(df_rumah["Kecamatan"].dropna().unique().tolist()),
+                "range_harga_list": df_rumah["Range Harga"].unique().tolist()
+            })
+
+        if lokasi_filter not in df_rumah["Kecamatan"].values:
+            return jsonify({"success": False, "error": "Kecamatan tidak tersedia dalam database."}), 400
+
+        # Filter dataset
+        df_filtered = df_rumah[
+            (df_rumah["Kecamatan"] == lokasi_filter) & 
+            (df_rumah["Range Harga"] == harga_filter)
+        ]
+
+        if df_filtered.empty:
+            return jsonify({"success": True, "data": []})
+
+        # Konversi data ke format list of dictionaries untuk dikirim ke frontend
+        tampilkan_kolom = [
+            "Harga", "Kecamatan", "Kamar Tidur", "Kamar Mandi", "Luas Tanah",
+            "Luas Bangunan", "Daya Listrik", "Jumlah Lantai", "Carport",
+            "Kamar Tidur Pembantu", "Kamar Mandi Pembantu"
+        ]
+        
+        result_data = df_filtered[tampilkan_kolom].fillna(0).to_dict(orient='records')
+
+        return jsonify({
+            "success": True,
+            "total_data": len(result_data),
+            "data": result_data
+        })
+
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)}), 500
+
+if __name__ == '__main__':
+    app.run(debug=True, port=5000)
