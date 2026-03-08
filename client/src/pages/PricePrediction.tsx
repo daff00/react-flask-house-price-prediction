@@ -40,7 +40,7 @@ export default function PricePrediction() {
     setLoading(true);
     try {
       // Menghubungi Gateway Node.js
-      const response = await axios.post(`${apiUrl}/api/predictions/predict`, formData);
+      const response = await axios.post(`${apiUrl}/api/predictions/`, formData);
       setPrediction(response.data.data.predicted_price);
     } catch (error) {
       console.error("Error predicting price:", error);

@@ -1,32 +1,41 @@
 import { Request, Response } from 'express';
 import axios from 'axios';
 import Prediction from '../models/Prediction.js'; 
+import connectDB from '../config/db.js';
 
-export const createPrediction = async (req: Request, res: Response): Promise<void> => {
+// server/src/controllers/predictionController.ts
+
+export const createPrediction = async (req: Request, res: Response) => {
   try {
-    const userInput = req.body;
-    const flaskApiUrl = process.env.FLASK_API_URL as string;
+    // 1. Pastikan koneksi DB (Sangat penting di Serverless)
+    await connectDB();
 
-    const flaskResponse = await axios.post(`${flaskApiUrl}/predict`, userInput);
+    // 2. Kirim data ke Flask
+    // Pastikan process.env.FLASK_API_URL sudah benar di Vercel
+    const flaskResponse = await axios.post(`${process.env.FLASK_API_URL}/predict`, req.body);
 
-    if (!flaskResponse.data.success) {
-      res.status(400).json({ success: false, error: 'ML Failed to predict.' });
-      return;
-    }
-
-    const predictedPrice = flaskResponse.data.predicted_price;
-
+    // 3. Simpan ke MongoDB (Jika Flask berhasil)
     const newPrediction = await Prediction.create({
-      ...userInput,
-      predicted_price: predictedPrice,
+      ...req.body,
+      result: flaskResponse.data.predicted_price
     });
 
-    res.status(201).json({ success: true, data: newPrediction });
-  } catch (error) {
-    if (error instanceof Error) {
-      console.error('Error createPrediction:', error.message);
-    }
-    res.status(500).json({ success: false, error: "There's an error from the Gateway Server" });
+    // 4. Kirim respon sukses
+    res.status(200).json({
+      success: true,
+      data: newPrediction,
+      prediction: flaskResponse.data
+    });
+
+  } catch (error: any) {
+    console.error("Error di Controller:", error.message);
+    
+    // Kirim JSON agar tidak memicu error CORS "Missing Header"
+    res.status(500).json({
+      success: false,
+      error: error.message,
+      details: error.response?.data || "Internal Server Error"
+    });
   }
 };
 
