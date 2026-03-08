@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { Home as HomeIcon, TrendingUp, Search, Map, AlertCircle } from 'lucide-react';
+import { TrendingUp, Search, Map, AlertCircle } from 'lucide-react';
 
 export default function Home() {
   return (
