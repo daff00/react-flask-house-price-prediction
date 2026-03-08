@@ -111,7 +111,7 @@ def get_specs():
         lokasi_filter = request.args.get('kecamatan')
         harga_filter = request.args.get('range_harga')
 
-        if not os.path.exists("data/processed/Data Harga Rumah Kabupaten Tangerang.csv"):
+        if not os.path.exists("data/Data Harga Rumah Kabupaten Tangerang.csv"):
             return jsonify({"success": False, "error": "Dataset tidak ditemukan."}), 404
 
         df_rumah = pd.read_csv("data/processed/Data Harga Rumah Kabupaten Tangerang.csv")
