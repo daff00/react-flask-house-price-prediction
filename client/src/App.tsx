@@ -1,13 +1,21 @@
-import './App.css'
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import Layout from './components/Layout';
+import Home from './pages/Home';
+import PricePrediction from './pages/PricePrediction';
+import SpecsPrediction from './pages/SpecsPrediction';
 
 function App() {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gray-100">
-      <h1 className="text-3xl font-bold text-blue-600 underline">
-        Frontend React (TSX) Ready
-      </h1>
-    </div>
-  )
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<Layout />}>
+          <Route index element={<Home />} />
+          <Route path="predict" element={<PricePrediction />} />
+          <Route path="specs" element={<SpecsPrediction />} />
+        </Route>
+      </Routes>
+    </BrowserRouter>
+  );
 }
 
-export default App
+export default App;
