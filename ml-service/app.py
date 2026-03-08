@@ -32,3 +32,14 @@ unavailable_district = [
     'Gunung Kaler', 'Jambe', 'Kemiri', 'Mekar Baru', 
     'Pakuhaji', 'Sepatan Timur', 'Sukadiri', 'Sukamulya'
 ]
+
+def categorize_price(price):
+    if price < 500_000_000: return "< 500 Juta"
+    elif price < 1_000_000_000: return "500 Juta - 1 Miliar"
+    elif price < 1_500_000_000: return "1 - 1.5 Miliar"
+    elif price < 2_000_000_000: return "1.5 - 2 Miliar"
+    elif price < 2_500_000_000: return "2 - 2.5 Miliar"
+    elif price < 3_000_000_000: return "2.5 - 3 Miliar"
+    elif price < 4_000_000_000: return "3 - 4 Miliar"
+    elif price < 5_000_000_000: return "4 - 5 Miliar"
+    else: return "> 5 Miliar"
