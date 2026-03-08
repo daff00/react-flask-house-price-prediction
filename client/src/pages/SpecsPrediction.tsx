@@ -55,12 +55,14 @@ export default function SpecsPrediction() {
   const [filters, setFilters] = useState({ kecamatan: "", range_harga: "" });
   const [result, setResult] = useState<HouseSpecs | null>(null);
 
+  const apiUrl = import.meta.env.VITE_API_URL;
+
   // --- 1. AMBIL OPSI FILTER ---
   useEffect(() => {
     const fetchOptions = async () => {
       try {
         const res = await axios.get(
-          "http://localhost:3000/api/predictions/specs",
+          `${apiUrl}/api/predictions/specs`,
         );
         console.log("Response Server:", res.data); // Debugging
 
@@ -99,7 +101,7 @@ export default function SpecsPrediction() {
     setError(null);
     try {
       const res = await axios.get(
-        "http://localhost:3000/api/predictions/specs",
+        `${apiUrl}/api/predictions/specs`,
         { params: filters },
       );
 
