@@ -80,7 +80,7 @@ def predict():
         })
 
         # Electrical power encoding
-        df_input[['Daya Listrik']] = watt_enc.transform(df_input[['Data Listrik']])
+        df_input[['Daya Listrik']] = watt_enc.transform(df_input[['Daya Listrik']])
 
         # Join and sort column
         df_final = pd.concat([df_input, pd.DataFrame([district_encoded])], axis=1)
@@ -114,7 +114,7 @@ def get_specs():
         if not os.path.exists("data/Data Harga Rumah Kabupaten Tangerang.csv"):
             return jsonify({"success": False, "error": "Dataset tidak ditemukan."}), 404
 
-        df_rumah = pd.read_csv("data/processed/Data Harga Rumah Kabupaten Tangerang.csv")
+        df_rumah = pd.read_csv("data/Data Harga Rumah Kabupaten Tangerang.csv")
         df_rumah["Range Harga"] = df_rumah["Harga"].apply(categorize_price)
 
         # Jika hanya request list kecamatan dan range harga (untuk dropdown frontend)
