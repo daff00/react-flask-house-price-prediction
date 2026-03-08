@@ -12,12 +12,13 @@ export const createPrediction = async (req: Request, res: Response) => {
 
     // 2. Kirim data ke Flask
     // Pastikan process.env.FLASK_API_URL sudah benar di Vercel
+    console.log("DEBUG FLASK URL:", process.env.FLASK_API_URL);
     const flaskResponse = await axios.post(`${process.env.FLASK_API_URL}/predict`, req.body);
 
     // 3. Simpan ke MongoDB (Jika Flask berhasil)
     const newPrediction = await Prediction.create({
       ...req.body,
-      result: flaskResponse.data.predicted_price
+      predicted_price: flaskResponse.data.predicted_price
     });
 
     // 4. Kirim respon sukses
