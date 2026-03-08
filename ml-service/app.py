@@ -146,10 +146,21 @@ def get_specs():
         
         result_data = df_filtered[tampilkan_kolom].fillna(0).to_dict(orient='records')
 
+        recommended_specs = {
+            "kamar_tidur": int(df_filtered["Kamar Tidur"].median()),
+            "kamar_mandi": int(df_filtered["Kamar Mandi"].median()),
+            "luas_tanah": int(df_filtered["Luas Tanah"].median()),
+            "luas_bangunan": int(df_filtered["Luas Bangunan"].median()),
+            "daya_listrik": int(df_filtered["Daya Listrik"].median()),
+            "jumlah_lantai": int(df_filtered["Jumlah Lantai"].median()),
+            "carport": int(df_filtered["Carport"].median())
+        }
+
         return jsonify({
             "success": True,
             "total_data": len(result_data),
-            "data": result_data
+            "data": result_data,
+            "recommended_specs": recommended_specs
         })
 
     except Exception as e:
