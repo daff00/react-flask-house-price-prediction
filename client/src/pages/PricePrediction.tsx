@@ -25,6 +25,8 @@ export default function PricePrediction() {
     kamar_mandi_pembantu: 0,
   });
 
+  const apiUrl = import.meta.env.VITE_API_URL;
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
@@ -38,7 +40,7 @@ export default function PricePrediction() {
     setLoading(true);
     try {
       // Menghubungi Gateway Node.js
-      const response = await axios.post('http://localhost:3000/api/predictions', formData);
+      const response = await axios.post(`${apiUrl}/api/predictions`, formData);
       setPrediction(response.data.data.predicted_price);
     } catch (error) {
       console.error("Error predicting price:", error);
